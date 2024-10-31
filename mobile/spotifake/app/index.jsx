@@ -3,11 +3,39 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { Link } from 'expo-router';
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [senha, setsenha] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const handleLogin = async () =>{
+    if (!email || !senha) {
+    }
+    try{
+      const response = await fetch('http://localhost:8000/login',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email: email, senha: senha}),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.sucess) {
+          Alert.alert('success')
+        }
+        else {
+          Alert.alert('Falha ao logar');
+        }
+
+      })
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -31,11 +59,6 @@ const LoginScreen = () => {
     } catch (error) {
       console.log('Erro ao salvar o tema:', error);
     }
-  };
-
-  const handleLogin = () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
   };
 
   const handleForgotPassword = () => {
@@ -64,8 +87,8 @@ const LoginScreen = () => {
       <TextInput
         style={[styles.input, isDarkMode && styles.darkInput]}
         placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
+        value={senha}
+        onChangeText={setsenha}
         secureTextEntry
         placeholderTextColor={isDarkMode ? '#777' : '#aaa'}
       />

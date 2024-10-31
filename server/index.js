@@ -2,9 +2,15 @@ import  Express  from "express"
 import { User, criarTabelas } from "./db.js"
 import bcryptjs from "bcryptjs"
 import jwt from "jsonwebtoken"
+import cors from "cors"
+
+
 
 const app = Express()
 app.use(Express.json())
+
+app.use(cors())
+
 
 //criarTabelas()
 app.post('/registro', async function (req, res) {
@@ -25,9 +31,10 @@ app.post('/registro', async function (req, res) {
       sobrenome : sobrenome,
       email : email,
       senha : senhaSegura,
-      dataNasc : datanascimento,
+      dataNascimento : datanascimento,
     })
-    res.status(201).send('Usuário criado com sucesso.')
+    res.status(201).send({msg:
+      'Usuário criado com sucesso.'})
   } catch(err){
 
   }
@@ -38,7 +45,7 @@ app.post('/login', async function (req, res) {
   try{
     const { email, senha } = req.body
   if (!email || !senha ){
-    res.status(400).send('Todos os campos devem estar preenchidos.')
+    res.status(400).send('Todos os campos devem estar preenchidos para o login.')
     return
 
   }
@@ -50,7 +57,7 @@ app.post('/login', async function (req, res) {
   
   const senhaCorreta = bcryptjs.compareSync(senha, usuario.senha)
   if(!senhaCorreta){
-    res.send('Senha inválida')
+    res.send({msg: 'Senha inválida'})
     return
   }
   const token = jwt.sign(
@@ -76,5 +83,7 @@ app.post('/login', async function (req, res) {
   }
   
 })
+
+
 
 app.listen(8000)

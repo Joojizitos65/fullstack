@@ -4,16 +4,48 @@ import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUpScreen = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [nome, setnome] = useState('');
+  const [sobrenome, setsobrenome] = useState('');
   const [email, setEmail] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [senha, setsenha] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+  const [datanascimento, setdatanascimento] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+    const handleCreate = async () =>{
+    if (!email || !senha || !nome || !sobrenome || !datanascimento) {
+    Alert.alert('preencha tudo')
+    }
+    try{
+      const response = await fetch('http://localhost:8000/registro',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email: email, senha: senha, nome: nome, sobrenome: sobrenome, datanascimento: datanascimento}),
+      })
+      .then(response => response.json()) 
+      .then(data => {
+        if (data.sucess) {
+          Alert.alert('success')
+        }
+        else {
+          Alert.alert('Falha ao logar');
+        }
+
+      })
+      .catch(error => {
+        console.log(error)
+        Alert.alert('erro')
+      })
+    } catch (err){
+        console.log(err)
+    }
+    
+  }
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -47,31 +79,9 @@ const SignUpScreen = () => {
     if (formattedDate.length >= 5) {
       formattedDate = `${formattedDate.slice(0, 5)}/${formattedDate.slice(5)}`;
     }
-    setBirthDate(formattedDate);
+    setdatanascimento(formattedDate);
   };
 
-  const handleSignUp = () => {
-    if (email !== confirmEmail) {
-      Alert.alert('Erro', 'Os emails não coincidem.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Erro', 'As senhas não coincidem.');
-      return;
-    }
-
-    if (!firstName || !lastName || !email || !password || !birthDate) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
-      return;
-    }
-
-    console.log('Nome:', firstName);
-    console.log('Sobrenome:', lastName);
-    console.log('Email:', email);
-    console.log('Senha:', password);
-    console.log('Data de nascimento:', birthDate);
-  };
 
   return (
     <View style={[styles.container, isDarkMode && styles.darkContainer]}>
@@ -81,16 +91,16 @@ const SignUpScreen = () => {
       <TextInput
         style={[styles.input, isDarkMode && styles.darkInput]}
         placeholder="Nome"
-        value={firstName}
-        onChangeText={setFirstName}
+        value={nome}
+        onChangeText={setnome}
         placeholderTextColor={isDarkMode ? '#aaa' : '#aaa'}
       />
 
       <TextInput
         style={[styles.input, isDarkMode && styles.darkInput]}
         placeholder="Sobrenome"
-        value={lastName}
-        onChangeText={setLastName}
+        value={sobrenome}
+        onChangeText={setsobrenome}
         placeholderTextColor={isDarkMode ? '#aaa' : '#aaa'}
       />
 
@@ -122,12 +132,12 @@ const SignUpScreen = () => {
         <TextInput
           style={[
             styles.inputPassword,
-            password !== confirmPassword && confirmPassword.length > 0 && styles.inputError,
+            senha !== confirmPassword && confirmPassword.length > 0 && styles.inputError,
             isDarkMode && styles.darkInput,
           ]}
           placeholder="Senha"
-          value={password}
-          onChangeText={setPassword}
+          value={senha}
+          onChangeText={setsenha}
           secureTextEntry={!showPassword}
           placeholderTextColor={isDarkMode ? '#aaa' : '#aaa'}
         />
@@ -137,7 +147,7 @@ const SignUpScreen = () => {
         <TextInput
           style={[
             styles.inputPassword,
-            password !== confirmPassword && confirmPassword.length > 0 && styles.inputError,
+            senha !== confirmPassword && confirmPassword.length > 0 && styles.inputError,
             isDarkMode && styles.darkInput,
           ]}
           placeholder="Confirmar Senha"
@@ -151,14 +161,14 @@ const SignUpScreen = () => {
       <TextInput
         style={[styles.input, isDarkMode && styles.darkInput]}
         placeholder="Data de Nascimento (DD/MM/AAAA)"
-        value={birthDate}
+        value={datanascimento}
         onChangeText={handleBirthDateChange}
         placeholderTextColor={isDarkMode ? '#aaa' : '#aaa'}
         keyboardType="numeric"
         maxLength={10}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+      <TouchableOpacity style={styles.button} onPress={handleCreate}>
         <Text style={styles.buttonText}>Registrar</Text>
       </TouchableOpacity>
 
