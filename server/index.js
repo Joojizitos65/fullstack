@@ -1,11 +1,7 @@
 import  Express  from "express"
-import { User, criarTabelas } from "./db.js"
-import bcryptjs from "bcryptjs"
-import jwt from "jsonwebtoken"
 import cors from "cors"
-import { registro_funcao } from "./controlador/controlador_autenticacao.js"
-import { loginfuncao } from "./controlador/controlador_autenticacao.js"
-
+import { rotas_usuarios } from "./routes/rotas_usuarios.js"
+import { rotas_autenticacao } from "./routes/rotas_autenticacao.js"
 
 const app = Express()
 app.use(Express.json())
@@ -14,7 +10,7 @@ app.use(cors())
 
 
 //criarTabelas()
-app.post('/registro',registro_funcao )
-app.post('/login', loginfuncao)
+app.use('/autenticacao', rotas_autenticacao)
+app.use('/usuario', rotas_usuarios)
 
 app.listen(8000)
