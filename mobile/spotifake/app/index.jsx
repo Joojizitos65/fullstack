@@ -1,41 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { Link, useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
+import { AppContext } from '../scripts/appContext';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
-  const [senha, setsenha] = useState('');
+  const [senha, setSenha] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mensagem, setMensagem] = useState('');
+  const router = useRouter(); 
+  
 
-  const handleLogin = async () =>{
+  const handleLogin = async () => {
     if (!email || !senha) {
+      setMensagem('Todos os campos devem ser preenchidos');
+      return;
     }
-    try{
-      const response = await fetch('http://localhost:8000/login',{
+
+    try {
+      const response = await fetch('http://localhost:8000/autenticacao/login', {
         method: 'POST',
         headers: {
+          Accept: 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({email: email, senha: senha}),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.sucess) {
-          Alert.alert('success')
-        }
-        else {
-          Alert.alert('Falha ao logar');
-        }
+        body: JSON.stringify({ email, senha })
+      });
 
-      })
+      const data = await response.json();
+      
+      if (response.status === 200) {
+        setMensagem('Login bem-sucedido!');
+        await AsyncStorage.setItem('userId', data.userInfo.id.toString());
+        console.log('ID do usuário armazenado', data.userInfo.id);
+        if (data.userInfo.status === 'active') {
+          router.push('/home'); 
+        } else {
+          router.push('/home');
+        }
+      } else if (response.status === 409) {
+        setMensagem('Email ou senha incorretos');
+      } else {
+        setMensagem('Erro ao fazer login, tente novamente');
+      }
+    } catch (error) {
+      setMensagem('Erro durante o login. Tente novamente.');
     }
-    catch(err){
-      console.log(err);
-    }
-  }
+  };
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -74,6 +87,8 @@ const LoginScreen = () => {
       <Text style={[styles.title, isDarkMode && styles.darkText]}>Bem-vindo de volta!</Text>
       <Text style={[styles.subtitle, isDarkMode && styles.darkText]}>Faça login na sua conta</Text>
 
+      {mensagem ? <Text style={styles.errorMessage}>{mensagem}</Text> : null}
+
       <TextInput
         style={[styles.input, isDarkMode && styles.darkInput]}
         placeholder="Email"
@@ -88,7 +103,7 @@ const LoginScreen = () => {
         style={[styles.input, isDarkMode && styles.darkInput]}
         placeholder="Senha"
         value={senha}
-        onChangeText={setsenha}
+        onChangeText={setSenha}
         secureTextEntry
         placeholderTextColor={isDarkMode ? '#777' : '#aaa'}
       />

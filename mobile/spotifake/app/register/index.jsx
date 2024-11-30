@@ -15,37 +15,51 @@ const SignUpScreen = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-    const handleCreate = async () =>{
+  const handleCreate = async () => {
     if (!email || !senha || !nome || !sobrenome || !datanascimento) {
-    Alert.alert('preencha tudo')
+        Alert.alert('Erro', 'Todos os campos devem ser preenchidos');
+        return;
     }
-    try{
-      const response = await fetch('http://localhost:8000/registro',{
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({email: email, senha: senha, nome: nome, sobrenome: sobrenome, datanascimento: datanascimento}),
-      })
-      .then(response => response.json()) 
-      .then(data => {
-        if (data.sucess) {
-          Alert.alert('success')
-        }
-        else {
-          Alert.alert('Falha ao logar');
-        }
 
-      })
-      .catch(error => {
-        console.log(error)
-        Alert.alert('erro')
-      })
-    } catch (err){
-        console.log(err)
+    if (email !== confirmEmail) {
+        Alert.alert('Erro', 'Os emails não coincidem');
+        return;
     }
-    
-  }
+
+    if (senha !== confirmPassword) {
+        Alert.alert('Erro', 'As senhas não coincidem');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8000/autenticacao/registro', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                senha: senha,
+                nome: nome,
+                sobrenome: sobrenome,
+                dataNascimento: datanascimento,
+            }),
+        });
+
+        if (response.status === 200) {
+            Alert.alert('Sucesso', 'Usuário registrado com sucesso!');
+        } else if (response.status === 409) {
+            Alert.alert('Erro', 'O email já está registrado.');
+        } else {
+            Alert.alert('Erro', 'Ocorreu um erro durante o registro. Tente novamente.');
+        }
+    } catch (error) {
+        Alert.alert('Erro', 'Não foi possível se conectar ao servidor. Verifique sua conexão.');
+        console.error(error);
+    }
+};
+
 
   useEffect(() => {
     const loadTheme = async () => {
